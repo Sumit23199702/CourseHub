@@ -5,9 +5,6 @@ import { toast } from "react-toastify";
 function ManageCourses() {
   const [courses, setCourses] = useState([]);
 
-  // ==========================
-  // Get All Courses
-  // ==========================
 
   const getCourses = async () => {
     try {
@@ -23,9 +20,6 @@ function ManageCourses() {
     getCourses();
   }, []);
 
-  // ==========================
-  // Delete Course
-  // ==========================
 
   const deleteCourse = async (id) => {
     try {

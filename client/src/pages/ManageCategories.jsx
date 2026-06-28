@@ -8,9 +8,6 @@ function ManageCategories() {
   const [editId, setEditId] = useState(null);
   const [isEdit, setIsEdit] = useState(false);
 
-  // ==========================
-  // Get All Categories
-  // ==========================
   const getCategories = async () => {
     try {
       const response = await api.get("/categories/get-all");
@@ -25,9 +22,6 @@ function ManageCategories() {
     getCategories();
   }, []);
 
-  // ==========================
-  // Add Category
-  // ==========================
   const addCategory = async (e) => {
     try {
       e.preventDefault();
@@ -51,9 +45,6 @@ function ManageCategories() {
     }
   };
 
-  // ==========================
-  // Delete Category
-  // ==========================
   const deleteCategory = async (id) => {
     try {
       let confirmDelete = window.confirm(

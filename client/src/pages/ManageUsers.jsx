@@ -5,10 +5,6 @@ import { toast } from "react-toastify";
 function ManageUsers() {
   const [users, setUsers] = useState([]);
 
-  // ======================
-  // Get All Users
-  // ======================
-
   const getUsers = async () => {
     try {
       const response = await api.get("/users/all-users");
@@ -22,10 +18,6 @@ function ManageUsers() {
   useEffect(() => {
     getUsers();
   }, []);
-
-  // ======================
-  // Delete User
-  // ======================
 
   const deleteUser = async (id) => {
     try {
