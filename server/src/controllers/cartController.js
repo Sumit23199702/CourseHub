@@ -94,7 +94,7 @@ const removeFromCart = async (req, res) => {
     cart.courses = cart.courses.filter(
       (item) => item.courseId.toString() !== courseId,
     );
-    cart.totalPrice = totalPrice - course.price;
+    cart.totalPrice = cart.totalPrice - course.price;
 
     await cart.save();
     return res.status(200).json({ msg: "Course Removed From Cart", cart });

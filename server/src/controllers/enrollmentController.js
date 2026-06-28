@@ -53,7 +53,7 @@ const getMyCourses = async (req, res) => {
     let courses = await enrollmentModel.find({ userId: req.userId }).populate({
       path: "courseId",
       populate: {
-        path: "categoryId",
+        path: "category",
       },
     });
 

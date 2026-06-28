@@ -109,11 +109,13 @@ const getCourseById = async (req, res) => {
 const updateCourse = async (req, res) => {
   try {
     let courseId = req.params.id;
+
     if (!isValidObjectId(courseId)) {
       return res.status(400).json({ msg: "Invalid CourseId" });
     }
 
     let courseData = req.body;
+
     if (!courseData || Object.keys(courseData).length === 0) {
       return res.status(400).json({ msg: "Bad Request, No Data Provided" });
     }
@@ -159,24 +161,51 @@ const updateCourse = async (req, res) => {
       if (!isValidObjectId(category)) {
         return res.status(400).json({ msg: "Invalid Category" });
       }
+
       let categoryData = await categoryModel.findById(category);
+
       if (!categoryData) {
         return res.status(404).json({ msg: "Category Not Found" });
       }
     }
+
+    // ===========================
+    // Check Course Exists
+    // ===========================
+
+    let course = await courseModel.findById(courseId);
+
+    if (!course) {
+      return res.status(404).json({ msg: "Course Not Found" });
+    }
+
+    // ===========================
+    // Instructor can update only own course
+    // ===========================
+
+    if (
+      req.role === "instructor" &&
+      course.instructorId.toString() !== req.userId
+    ) {
+      return res.status(403).json({
+        msg: "You can update only your own courses",
+      });
+    }
+
+    // ===========================
+    // Update Course
+    // ===========================
 
     let updatedCourse = await courseModel.findByIdAndUpdate(
       courseId,
       courseData,
       { new: true },
     );
-    if (!updatedCourse) {
-      return res.status(404).json({ msg: "Course Not Found" });
-    }
 
-    return res
-      .status(200)
-      .json({ msg: "Course Updated Successfully", updatedCourse });
+    return res.status(200).json({
+      msg: "Course Updated Successfully",
+      updatedCourse,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "Internal Server Error" });
@@ -187,21 +216,66 @@ const updateCourse = async (req, res) => {
 const deleteCourse = async (req, res) => {
   try {
     let courseId = req.params.id;
+
     if (!isValidObjectId(courseId)) {
       return res.status(400).json({ msg: "Invalid CourseId" });
     }
 
-    let course = await courseModel.findByIdAndDelete(courseId);
+    // ===========================
+    // Check Course Exists
+    // ===========================
+
+    let course = await courseModel.findById(courseId);
+
     if (!course) {
       return res
         .status(404)
         .json({ msg: "Course Not Found or already deleted" });
     }
 
-    return res.status(200).json({ msg: "Course Deleted Successfully" });
+    // ===========================
+    // Instructor can delete only own course
+    // ===========================
+
+    if (
+      req.role === "instructor" &&
+      course.instructorId.toString() !== req.userId
+    ) {
+      return res.status(403).json({
+        msg: "You can delete only your own courses",
+      });
+    }
+
+    // ===========================
+    // Delete Course
+    // ===========================
+
+    await courseModel.findByIdAndDelete(courseId);
+
+    return res.status(200).json({
+      msg: "Course Deleted Successfully",
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: "Internal Server Error" });
+  }
+};
+
+// Get Instructor Courses
+const getInstructorCourses = async (req, res) => {
+  try {
+    let courses = await courseModel
+      .find({ instructorId: req.userId })
+      .populate("category", "categoryName");
+
+    if (courses.length === 0) {
+      return res.status(404).json({ msg: "No Courses Found" });
+    }
+
+    return res.status(200).json({ courses });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ msg: "Internal Server Error" });
   }
 };
 
@@ -211,4 +285,5 @@ module.exports = {
   getCourseById,
   updateCourse,
   deleteCourse,
+  getInstructorCourses,
 };
